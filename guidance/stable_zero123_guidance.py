@@ -1,10 +1,10 @@
+import threestudio
 import torch
 import torch.nn.functional as F
-import threestudio
-from tqdm import tqdm
-
 from threestudio.models.guidance.stable_zero123_guidance import StableZero123Guidance
 from threestudio.utils.typing import *
+from tqdm import tqdm
+
 
 @threestudio.register("mvimg-gen-stable-zero123-guidance")
 class StableZero123GuidanceInference(StableZero123Guidance):
@@ -78,7 +78,7 @@ class StableZero123GuidanceInference(StableZero123Guidance):
             # add noise
             noise = torch.randn_like(latents)  # TODO: use torch generator
             latents_noisy = self.scheduler.add_noise(latents, noise, t)
-        
+
         guidance_out = self.guidance_eval(cond, latents_noisy, noise)
 
         return guidance_out
