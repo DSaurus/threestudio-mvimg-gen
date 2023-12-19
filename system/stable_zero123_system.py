@@ -11,7 +11,9 @@ from threestudio.utils.typing import *
 class Zero123Simple(BaseLift3DSystem):
     @dataclass
     class Config(BaseLift3DSystem.Config):
-        pass
+        freq: dict = field(default_factory=dict)
+        refinement: bool = False
+        ambient_ratio_min: float = 0.5
 
     cfg: Config
 
@@ -36,7 +38,7 @@ class Zero123Simple(BaseLift3DSystem):
         pass
 
     def test_step(self, batch, batch_idx):
-        out = self.guidance(**batch["random_camera"])
+        out = self.guidance(**batch)
         self.save_image_grid(
             f"it{self.true_global_step}-test/{batch['index'][0]}.png",
             [
@@ -56,7 +58,7 @@ class Zero123Simple(BaseLift3DSystem):
             f"it{self.true_global_step}-test",
             "(\d+)\.png",
             save_format="mp4",
-            fps=30,
+            fps=2,
             name="test",
             step=self.true_global_step,
         )

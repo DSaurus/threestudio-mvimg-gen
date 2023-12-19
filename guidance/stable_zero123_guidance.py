@@ -11,8 +11,7 @@ class StableZero123GuidanceInference(StableZero123Guidance):
     @torch.cuda.amp.autocast(enabled=False)
     @torch.no_grad()
     def guidance_eval(self, cond, latents_noisy, noise_pred):
-        # use only 50 timesteps, and find nearest of those to t
-        self.scheduler.set_timesteps(30)
+        self.scheduler.set_timesteps(100)
         self.scheduler.timesteps_gpu = self.scheduler.timesteps.to(self.device)
         bs = latents_noisy.shape[0]
         idxs = torch.zeros(bs, dtype=torch.long, device=self.device)
@@ -23,24 +22,18 @@ class StableZero123GuidanceInference(StableZero123Guidance):
         latents_final = []
         for b, i in enumerate(idxs):
             latents = latents_noisy[b : b + 1]
-            c = {
-                "c_crossattn": [cond["c_crossattn"][0][[b, b + len(idxs)], ...]],
-                "c_concat": [cond["c_concat"][0][[b, b + len(idxs)], ...]],
-            }
-            for t in tqdm(self.scheduler.timesteps[i + 1 :], leave=False):
+            for t in tqdm(self.scheduler.timesteps[i:], leave=False):
                 # pred noise
                 x_in = torch.cat([latents] * 2)
                 t_in = torch.cat([t.reshape(1)] * 2).to(self.device)
-                noise_pred = self.model.apply_model(x_in, t_in, c)
+                noise_pred = self.model.apply_model(x_in, t_in, cond)
                 # perform guidance
                 noise_pred_uncond, noise_pred_cond = noise_pred.chunk(2)
                 noise_pred = noise_pred_uncond + self.cfg.guidance_scale * (
                     noise_pred_cond - noise_pred_uncond
                 )
                 # get prev latent
-                latents = self.scheduler.step(noise_pred, t, latents, eta=1)[
-                    "prev_sample"
-                ]
+                latents = self.scheduler.step(noise_pred, t, latents)["prev_sample"]
             latents_final.append(latents)
 
         latents_final = torch.cat(latents_final)
@@ -59,8 +52,9 @@ class StableZero123GuidanceInference(StableZero123Guidance):
         **kwargs,
     ):
         batch_size = elevation.shape[0]
-        latents: Float[Tensor, "B 4 64 64"]
-        latents = torch.zeros((batch_size, 4, 64, 64), device=self.device)
+        assert batch_size == 1
+        latents: Float[Tensor, "B 4 32 32"]
+        latents = torch.zeros((batch_size, 4, 32, 32), device=self.device)
 
         cond = self.get_cond(elevation, azimuth, camera_distances)
 
