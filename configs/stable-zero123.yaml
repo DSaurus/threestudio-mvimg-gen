@@ -16,7 +16,14 @@ data: # threestudio/data/image.py -> SingleImageDataModuleConfig
   requires_depth: ${cmaxgt0orcmaxgt0:${system.loss.lambda_depth},${system.loss.lambda_depth_rel}}
   requires_normal: ${cmaxgt0:${system.loss.lambda_normal}}
   num_workers: 0
-  random_camera: # threestudio/data/uncond.py -> RandomCameraDataModuleConfig
+  random_camera:
+    # ------------------------------
+    eval_elevation_deg: 0.0
+    eval_camera_distance: 3.8
+    eval_fovy_deg: 20.0
+    n_test_views: 16
+    # ------------------------------
+
     height: [64, 128, 256]
     width: [64, 128, 256]
     batch_size: [4, 4, 4]
@@ -34,13 +41,10 @@ data: # threestudio/data/image.py -> SingleImageDataModuleConfig
     up_perturb: 0.0
     light_position_perturb: 1.0
     light_distance_range: [7.5, 10.0]
-    eval_elevation_deg: 0.0
-    eval_camera_distance: 3.8
-    eval_fovy_deg: 20.0
     light_sample_strategy: "dreamfusion"
     batch_uniform_azimuth: False
     n_val_views: 8
-    n_test_views: 8
+
 
 system_type: "mvimg-gen-stable-zero123-system"
 system:
@@ -101,8 +105,10 @@ system:
     cond_azimuth_deg: ${data.default_azimuth_deg}
     cond_camera_distance: ${data.default_camera_distance}
     guidance_scale: 7.5
-    min_step_percent: [50, 0.7, 0.3, 200]  # (start_iter, start_val, end_val, end_iter)
-    max_step_percent: [50, 0.98, 0.8, 200]
+    min_step_percent: 0.98
+    max_step_percent: 0.98
+
+  num_inference_steps: 100
 
   freq:
     ref_only_steps: 0

@@ -14,6 +14,7 @@ class Zero123Simple(BaseLift3DSystem):
         freq: dict = field(default_factory=dict)
         refinement: bool = False
         ambient_ratio_min: float = 0.5
+        num_inference_steps: int = 100
 
     cfg: Config
 
@@ -21,6 +22,7 @@ class Zero123Simple(BaseLift3DSystem):
         # create geometry, material, background, renderer
         super().configure()
         self.guidance = threestudio.find(self.cfg.guidance_type)(self.cfg.guidance)
+        self.guidance.num_inference_steps = self.cfg.num_inference_steps
 
     def forward(self, batch: Dict[str, Any]) -> Dict[str, Any]:
         pass

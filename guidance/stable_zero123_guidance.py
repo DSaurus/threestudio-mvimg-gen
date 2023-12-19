@@ -11,7 +11,7 @@ class StableZero123GuidanceInference(StableZero123Guidance):
     @torch.cuda.amp.autocast(enabled=False)
     @torch.no_grad()
     def guidance_eval(self, cond, latents_noisy, noise_pred):
-        self.scheduler.set_timesteps(100)
+        self.scheduler.set_timesteps(self.num_inference_steps)
         self.scheduler.timesteps_gpu = self.scheduler.timesteps.to(self.device)
         bs = latents_noisy.shape[0]
         idxs = torch.zeros(bs, dtype=torch.long, device=self.device)

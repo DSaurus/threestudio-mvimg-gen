@@ -15,3 +15,31 @@ If you want to download stable-zero123 model, please go to `load/zero123` direct
 ```
 python launch.py --config custom/threestudio-mvimg-gen/configs/stable-zero123.yaml --train --gpu 0 data.image_path=./load/images/catstatue_rgba.png
 ```
+
+## Camera parameters in config file
+```
+  random_camera:
+    # ------------------------------
+    eval_elevation_deg: 0.0
+    eval_camera_distance: 3.8
+    eval_fovy_deg: 20.0
+    n_test_views: 16
+    # ------------------------------
+```
+
+## stable-zero123 parameters in config file
+```
+  guidance:
+    pretrained_config: "./load/zero123/sd-objaverse-finetune-c_concat-256.yaml"
+    pretrained_model_name_or_path: "./load/zero123/stable_zero123.ckpt"
+    vram_O: false
+    cond_image_path: ${data.image_path}
+    cond_elevation_deg: ${data.default_elevation_deg}
+    cond_azimuth_deg: ${data.default_azimuth_deg}
+    cond_camera_distance: ${data.default_camera_distance}
+    guidance_scale: 7.5
+    min_step_percent: 0.98
+    max_step_percent: 0.98
+
+  num_inference_steps: 100
+```
